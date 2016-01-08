@@ -2,3 +2,7 @@
 name = "fragment"
 version = "0.1.0"
 authors = ["Jordan MacDonald <jordan@wastedintelligence.com>"]
+description = "Simple fragment/substring matching library"
+repository = "https://github.com/jmacdonald/fragment"
+keywords = ["fragment", "substring", "match"]
+license = "MIT"
