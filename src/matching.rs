@@ -1,5 +1,6 @@
-use std::ops::Deref;
+use std::clone::Clone;
 use std::cmp::Ordering;
+use std::ops::Deref;
 use std::string::ToString;
 
 #[derive(Debug, PartialEq)]
@@ -30,11 +31,11 @@ impl<T> Deref for Result<T> {
 ///     "fragment.rs".to_string(),
 ///     "lib.rs".to_string()
 /// ];
-/// let matches = find("lib", entries, 1);
+/// let matches = find("lib", &entries, 1);
 ///
 /// assert_eq!(*matches[0], "lib.rs");
 /// ```
-pub fn find<T: ToString>(needle: &str, haystack: Vec<T>, max_results: usize) -> Vec<Result<T>> {
+pub fn find<T: ToString + Clone>(needle: &str, haystack: &Vec<T>, max_results: usize) -> Vec<Result<T>> {
     let mut results = Vec::new();
 
     // Calculate a score for each of the haystack entries.
@@ -42,7 +43,7 @@ pub fn find<T: ToString>(needle: &str, haystack: Vec<T>, max_results: usize) -> 
         let score = similarity(needle, &object.to_string());
 
         results.push(Result{
-            object: object,
+            object: object.clone(),
             score: score
         });
     }
@@ -108,7 +109,7 @@ mod tests {
             "Fragfile".to_string(),
             "src/fragment.rs".to_string()
         ];
-        let results = find("Frag", haystack, 2);
+        let results = find("Frag", &haystack, 2);
         for i in 0..2 {
             assert_eq!(results[i].object, expected_results[i]);
         }
@@ -121,7 +122,7 @@ mod tests {
             "lib/fragments.rs".to_string(),
             "Fragfile".to_string()
         ];
-        let results = find("Frag", haystack, 2);
+        let results = find("Frag", &haystack, 2);
         assert_eq!(results.len(), 2);
     }
 
