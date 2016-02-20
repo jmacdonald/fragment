@@ -42,10 +42,12 @@ pub fn find<T: ToString + Clone>(needle: &str, haystack: &Vec<T>, max_results: u
     for object in haystack.into_iter() {
         let score = similarity(needle, &object.to_string());
 
-        results.push(Result{
-            object: object.clone(),
-            score: score
-        });
+        if score > 0.0 {
+          results.push(Result{
+              object: object.clone(),
+              score: score
+          });
+        }
     }
 
     // Sort the results in ascending order (higher values are worse).
@@ -103,13 +105,12 @@ mod tests {
         let haystack = vec![
             "src/fragment.rs".to_string(),
             "lib/fragments.rs".to_string(),
-            "Fragfile".to_string()
         ];
         let expected_results = vec![
-            "Fragfile".to_string(),
-            "src/fragment.rs".to_string()
+            "src/fragment.rs".to_string(),
+            "lib/fragments.rs".to_string()
         ];
-        let results = find("Frag", &haystack, 2);
+        let results = find("frag", &haystack, 2);
         for i in 0..2 {
             assert_eq!(results[i].object, expected_results[i]);
         }
@@ -120,10 +121,20 @@ mod tests {
         let haystack = vec![
             "src/fragment.rs".to_string(),
             "lib/fragments.rs".to_string(),
+        ];
+        let results = find("fragment", &haystack, 1);
+        assert_eq!(results.len(), 1);
+    }
+
+    #[test]
+    fn find_drops_zero_value_results() {
+        let haystack = vec![
+            "src/fragment.rs".to_string(),
+            "lib/fragments.rs".to_string(),
             "Fragfile".to_string()
         ];
-        let results = find("Frag", &haystack, 2);
-        assert_eq!(results.len(), 2);
+        let results = find("z", &haystack, 3);
+        assert_eq!(results.len(), 0);
     }
 
     #[test]
