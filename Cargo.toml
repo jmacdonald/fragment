@@ -1,6 +1,6 @@
 [package]
 name = "fragment"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Jordan MacDonald <jordan@wastedintelligence.com>"]
 description = "Simple fragment/substring matching library"
 repository = "https://github.com/jmacdonald/fragment"
