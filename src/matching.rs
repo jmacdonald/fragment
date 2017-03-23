@@ -31,16 +31,20 @@ impl<T> Deref for Result<T> {
 ///     "fragment.rs".to_string(),
 ///     "lib.rs".to_string()
 /// ];
-/// let matches = find("lib", &entries, 1);
+/// let matches = find("lib", &entries, 1, true);
 ///
 /// assert_eq!(*matches[0], "lib.rs");
 /// ```
-pub fn find<T: ToString + Clone>(needle: &str, haystack: &Vec<T>, max_results: usize) -> Vec<Result<T>> {
+pub fn find<T: ToString + Clone>(needle: &str, haystack: &Vec<T>, max_results: usize, case_sensitive: bool) -> Vec<Result<T>> {
     let mut results = Vec::new();
 
     // Calculate a score for each of the haystack entries.
     for object in haystack.into_iter() {
-        let score = similarity(needle, &object.to_string());
+        let score = if case_sensitive {
+            similarity(needle, &object.to_string())
+        } else {
+            similarity(&needle.to_lowercase(), &object.to_string().to_lowercase())
+        };
 
         if score > 0.0 {
           results.push(Result{
@@ -110,7 +114,7 @@ mod tests {
             "src/fragment.rs".to_string(),
             "lib/fragments.rs".to_string()
         ];
-        let results = find("frag", &haystack, 2);
+        let results = find("frag", &haystack, 2, true);
         for i in 0..2 {
             assert_eq!(results[i].object, expected_results[i]);
         }
@@ -122,7 +126,7 @@ mod tests {
             "src/fragment.rs".to_string(),
             "lib/fragments.rs".to_string(),
         ];
-        let results = find("fragment", &haystack, 1);
+        let results = find("fragment", &haystack, 1, true);
         assert_eq!(results.len(), 1);
     }
 
@@ -133,8 +137,17 @@ mod tests {
             "lib/fragments.rs".to_string(),
             "Fragfile".to_string()
         ];
-        let results = find("z", &haystack, 3);
+        let results = find("z", &haystack, 3, true);
         assert_eq!(results.len(), 0);
+    }
+
+    #[test]
+    fn find_correctly_searches_without_case_sensitivity() {
+        let haystack = vec![
+            "src/Fragment.rs".to_string(),
+        ];
+        let results = find("src/fragment.rs", &haystack, 1, false);
+        assert_eq!(results.first().unwrap().score, 1.0);
     }
 
     #[test]
