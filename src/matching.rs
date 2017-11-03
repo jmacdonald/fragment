@@ -1,7 +1,6 @@
 use std::clone::Clone;
 use std::cmp::Ordering;
 use std::ops::Deref;
-use std::string::ToString;
 
 #[derive(Debug, PartialEq)]
 pub struct Result<T> {
@@ -17,6 +16,22 @@ impl<T> Deref for Result<T> {
     }
 }
 
+pub trait AsStr {
+    fn as_str(&self) -> &str;
+}
+
+impl AsStr for String {
+    fn as_str(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl<'a> AsStr for &'a str {
+    fn as_str(&self) -> &str {
+        self
+    }
+}
+
 /// Given a set, `find` compares its elements and returns a set of `Result`
 /// objects ordered by increasing score values (first values are closest
 /// matches). If the result set is larger than `max_results`, the set is
@@ -28,19 +43,19 @@ impl<T> Deref for Result<T> {
 /// use fragment::matching::find;
 ///
 /// let entries = vec![
-///     "fragment.rs".to_string(),
-///     "lib.rs".to_string()
+///     "fragment.rs",
+///     "lib.rs"
 /// ];
 /// let matches = find("lib", &entries, 1);
 ///
 /// assert_eq!(*matches[0], "lib.rs");
 /// ```
-pub fn find<T: ToString + Clone>(needle: &str, haystack: &Vec<T>, max_results: usize) -> Vec<Result<T>> {
+pub fn find<T: AsStr + Clone>(needle: &str, haystack: &Vec<T>, max_results: usize) -> Vec<Result<T>> {
     let mut results = Vec::new();
 
     // Calculate a score for each of the haystack entries.
     for object in haystack.into_iter() {
-        let score = similarity(needle, &object.to_string());
+        let score = similarity(needle, object.as_str());
 
         if score > 0.0 {
           results.push(Result{
@@ -103,12 +118,12 @@ mod tests {
     #[test]
     fn find_returns_a_correctly_ordered_set_of_results() {
         let haystack = vec![
-            "src/fragment.rs".to_string(),
-            "lib/fragments.rs".to_string(),
+            "src/fragment.rs",
+            "lib/fragments.rs"
         ];
         let expected_results = vec![
-            "src/fragment.rs".to_string(),
-            "lib/fragments.rs".to_string()
+            "src/fragment.rs",
+            "lib/fragments.rs"
         ];
         let results = find("frag", &haystack, 2);
         for i in 0..2 {
@@ -119,8 +134,8 @@ mod tests {
     #[test]
     fn find_returns_a_correctly_limited_set_of_results() {
         let haystack = vec![
-            "src/fragment.rs".to_string(),
-            "lib/fragments.rs".to_string(),
+            "src/fragment.rs",
+            "lib/fragments.rs"
         ];
         let results = find("fragment", &haystack, 1);
         assert_eq!(results.len(), 1);
@@ -129,9 +144,9 @@ mod tests {
     #[test]
     fn find_drops_zero_value_results() {
         let haystack = vec![
-            "src/fragment.rs".to_string(),
-            "lib/fragments.rs".to_string(),
-            "Fragfile".to_string()
+            "src/fragment.rs",
+            "lib/fragments.rs",
+            "Fragfile"
         ];
         let results = find("z", &haystack, 3);
         assert_eq!(results.len(), 0);
