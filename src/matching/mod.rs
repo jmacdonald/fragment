@@ -1,35 +1,8 @@
+mod types;
+
+pub use self::types::{AsStr, Match};
+
 use std::cmp::Ordering;
-use std::ops::Deref;
-
-#[derive(Debug, PartialEq)]
-pub struct Match<'a, T: 'a> {
-    object: &'a T,
-    pub score: f32,
-}
-
-impl<'a, T> Deref for Match<'a, T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        self.object
-    }
-}
-
-pub trait AsStr {
-    fn as_str(&self) -> &str;
-}
-
-impl AsStr for String {
-    fn as_str(&self) -> &str {
-        self.as_str()
-    }
-}
-
-impl<'a> AsStr for &'a str {
-    fn as_str(&self) -> &str {
-        self
-    }
-}
 
 /// Given a set, `find` compares its elements and returns a set of `Match`
 /// objects ordered by increasing score values (first values are closest
@@ -57,10 +30,7 @@ pub fn find<'a, T: AsStr>(needle: &str, haystack: &'a Vec<T>, max_results: usize
         let score = similarity(needle, object.as_str());
 
         if score > 0.0 {
-          results.push(Match{
-              object: object,
-              score: score
-          });
+          results.push(Match::new(object, score));
         }
     }
 
@@ -126,7 +96,7 @@ mod tests {
         ];
         let results = find("frag", &haystack, 2);
         for i in 0..2 {
-            assert_eq!(*results[i].object, expected_results[i]);
+            assert_eq!(*results[i], expected_results[i]);
         }
     }
 
