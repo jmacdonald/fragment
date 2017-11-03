@@ -12,5 +12,8 @@ fn bench_find(b: &mut Bencher) {
         "src/fragment.rs".to_string(),
         "lib/fragments.rs".to_string(),
     ];
-    b.iter(|| matching::find("frag", &haystack, 2));
+    b.iter(|| {
+        let hs = &haystack;
+        matching::find("frag", &mut hs.into_iter(), 2)
+    });
 }
