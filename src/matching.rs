@@ -1,18 +1,17 @@
-use std::clone::Clone;
 use std::cmp::Ordering;
 use std::ops::Deref;
 
 #[derive(Debug, PartialEq)]
-pub struct Result<T> {
-    object: T,
+pub struct Result<'a, T: 'a> {
+    object: &'a T,
     pub score: f32,
 }
 
-impl<T> Deref for Result<T> {
+impl<'a, T> Deref for Result<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        &self.object
+        self.object
     }
 }
 
@@ -50,7 +49,7 @@ impl<'a> AsStr for &'a str {
 ///
 /// assert_eq!(*matches[0], "lib.rs");
 /// ```
-pub fn find<T: AsStr + Clone>(needle: &str, haystack: &Vec<T>, max_results: usize) -> Vec<Result<T>> {
+pub fn find<'a, T: AsStr>(needle: &str, haystack: &'a Vec<T>, max_results: usize) -> Vec<Result<'a, T>> {
     let mut results = Vec::new();
 
     // Calculate a score for each of the haystack entries.
@@ -59,7 +58,7 @@ pub fn find<T: AsStr + Clone>(needle: &str, haystack: &Vec<T>, max_results: usiz
 
         if score > 0.0 {
           results.push(Result{
-              object: object.clone(),
+              object: object,
               score: score
           });
         }
@@ -127,7 +126,7 @@ mod tests {
         ];
         let results = find("frag", &haystack, 2);
         for i in 0..2 {
-            assert_eq!(results[i].object, expected_results[i]);
+            assert_eq!(*results[i].object, expected_results[i]);
         }
     }
 
