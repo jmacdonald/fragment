@@ -2,12 +2,12 @@ use std::cmp::Ordering;
 use std::ops::Deref;
 
 #[derive(Debug, PartialEq)]
-pub struct Result<'a, T: 'a> {
+pub struct Match<'a, T: 'a> {
     object: &'a T,
     pub score: f32,
 }
 
-impl<'a, T> Deref for Result<'a, T> {
+impl<'a, T> Deref for Match<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -31,7 +31,7 @@ impl<'a> AsStr for &'a str {
     }
 }
 
-/// Given a set, `find` compares its elements and returns a set of `Result`
+/// Given a set, `find` compares its elements and returns a set of `Match`
 /// objects ordered by increasing score values (first values are closest
 /// matches). If the result set is larger than `max_results`, the set is
 /// reduced to that size.
@@ -49,7 +49,7 @@ impl<'a> AsStr for &'a str {
 ///
 /// assert_eq!(*matches[0], "lib.rs");
 /// ```
-pub fn find<'a, T: AsStr>(needle: &str, haystack: &'a Vec<T>, max_results: usize) -> Vec<Result<'a, T>> {
+pub fn find<'a, T: AsStr>(needle: &str, haystack: &'a Vec<T>, max_results: usize) -> Vec<Match<'a, T>> {
     let mut results = Vec::new();
 
     // Calculate a score for each of the haystack entries.
@@ -57,7 +57,7 @@ pub fn find<'a, T: AsStr>(needle: &str, haystack: &'a Vec<T>, max_results: usize
         let score = similarity(needle, object.as_str());
 
         if score > 0.0 {
-          results.push(Result{
+          results.push(Match{
               object: object,
               score: score
           });
