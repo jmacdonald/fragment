@@ -32,12 +32,6 @@ impl AsStr for String {
     }
 }
 
-impl<'a> AsStr for &'a String {
-    fn as_str(&self) -> &str {
-        self
-    }
-}
-
 impl<'a> AsStr for &'a str {
     fn as_str(&self) -> &str {
         self

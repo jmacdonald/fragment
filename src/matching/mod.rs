@@ -19,11 +19,11 @@ use std::iter::IntoIterator;
 ///     "fragment.rs",
 ///     "lib.rs"
 /// ];
-/// let matches = find("lib", &mut entries.into_iter(), 1);
+/// let matches = find("lib", &mut entries.iter(), 1);
 ///
-/// assert_eq!(*matches[0], "lib.rs");
+/// assert_eq!(*matches[0], &"lib.rs");
 /// ```
-pub fn find<'a, T: AsStr, I: IntoIterator<Item=T>>(needle: &str, haystack: I, max_results: usize) -> Vec<Match<T>> {
+pub fn find<'a, T: AsStr, I: IntoIterator<Item=&'a T>>(needle: &str, haystack: I, max_results: usize) -> Vec<Match<&'a T>> {
     let mut results = Vec::new();
 
     // Calculate a score for each of the haystack entries.
