@@ -1,3 +1,12 @@
+### 0.3.1
+
+* Updated find method to require AsStr on underlying type instead of reference.
+    Previously, the AsStr trait bound was specified directly for type T, but
+    we're expecting the iterator to yield references, not types. As it was,
+    AsStr would have to be implemented for references. This new signature
+    better expresses what we're after: an iterator that yields references to
+    types that implement AsStr.
+
 ### 0.3.0
 
 * Removed case_sensitive option from find function.
